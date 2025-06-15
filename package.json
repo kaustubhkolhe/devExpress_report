@@ -1,0 +1,12 @@
+{
+  "name": "PreciseReportsThree",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "devextreme-dist": "24.2.7",
+    "@devexpress/analytics-core": "24.2.7",
+    "devexpress-reporting": "24.2.7"
+  }
+}
