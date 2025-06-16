@@ -36,6 +36,8 @@ using PreciseReportsThree.Services;
 using PreciseReportsThree.Data;
 using Microsoft.EntityFrameworkCore;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // CORS policy
@@ -76,6 +78,8 @@ builder.Services.ConfigureReportingServices(configurator =>
         viewerConfigurator.RegisterConnectionProviderFactory<CustomSqlDataConnectionProviderFactory>();
     });
 });
+
+builder.Services.AddScoped<DynamicReportService>();
 
 // Database context
 builder.Services.AddDbContext<ReportDbContext>(options =>
