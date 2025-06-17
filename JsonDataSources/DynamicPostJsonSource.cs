@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using DevExpress.DataAccess.Json;
 using Newtonsoft.Json;
@@ -14,28 +15,32 @@ namespace PreciseReportsThree.JsonDataSources
 
         public override string GetJsonString()
         {
-            using (var client = new WebClient())
+            try
             {
-                // Set content type
-                client.Headers[HttpRequestHeader.ContentType] = ContentType;
-
-                // Add Bearer token authentication
-                if (!string.IsNullOrEmpty(BearerToken))
+                using (var client = new HttpClient())
                 {
-                    client.Headers.Add("Authorization", $"Bearer {BearerToken}");
-                }
+                    client.Timeout = TimeSpan.FromSeconds(30);
 
-                // Serialize the request object to JSON
-                string postData = string.Empty;
-                if (RequestObject != null)
-                {
-                    postData = JsonConvert.SerializeObject(RequestObject);
-                }
+                    if (!string.IsNullOrEmpty(BearerToken))
+                    {
+                        client.DefaultRequestHeaders.Authorization =
+                            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", BearerToken);
+                    }
 
-                // Perform POST request
-                byte[] data = Encoding.UTF8.GetBytes(postData);
-                byte[] response = client.UploadData(Uri, "POST", data);
-                return Encoding.UTF8.GetString(response);
+                    string postData = RequestObject != null ?
+                        JsonConvert.SerializeObject(RequestObject) : string.Empty;
+
+                    var content = new StringContent(postData, Encoding.UTF8, "application/json");
+
+                    var response = client.PostAsync(Uri, content).GetAwaiter().GetResult();
+                    response.EnsureSuccessStatusCode();
+
+                    return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to retrieve JSON data from {Uri}: {ex.Message}", ex);
             }
         }
 

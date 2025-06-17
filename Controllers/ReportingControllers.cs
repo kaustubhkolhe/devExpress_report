@@ -82,6 +82,28 @@ namespace PreciseReportsThree.Controllers
             designerModel.Assign(designerModelSettings);
             return DesignerModel(designerModel);
         }
+        // Testing Method
+        [HttpGet]
+        [Route("TestPostDataSource")]
+        public IActionResult TestPostDataSource()
+        {
+            try
+            {
+                var testData = new { test = "value", number = 123 };
+                var dataSource = DynamicPostJsonDataSourceHelper.CreatePostJsonDataSource(
+                    "https://jsonplaceholder.typicode.com",
+                    "/posts",
+                    testData,
+                    "test-token"
+                );
+
+                return Ok("DataSource created successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
 
         [HttpPost]
         [Route("GeneratePostReport")]
@@ -122,6 +144,12 @@ namespace PreciseReportsThree.Controllers
         [Route("GenerateDynamicReport")]
         public IActionResult GenerateDynamicReport([FromBody] ReportGenerationRequest request)
         {
+            if (string.IsNullOrEmpty(request.Endpoint))
+                return BadRequest("Endpoint is required");
+
+            if (string.IsNullOrEmpty(request.BearerToken))
+                return BadRequest("Bearer token is required");
+
             try
             {
                 var reportService = new DynamicReportService(_configuration);
